@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matrix Destiny Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --purple-dark: #5b21b6;
+      --purple-soft: #ede9fe;
+      --ink: #171321;
+      --muted: #6b6477;
+      --line: #e8e3f4;
+      --panel: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(124, 58, 237, .1), transparent 28rem),
+        linear-gradient(180deg, #fff 0%, #fbf9ff 42%, #fff 100%);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .navbar {
+      border-bottom: 1px solid rgba(124, 58, 237, .12);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: #fff;
+      background: var(--purple);
+      border-radius: 10px;
+      font-weight: 800;
+      box-shadow: 0 14px 30px rgba(124, 58, 237, .25);
+    }
+
+    .hero {
+      padding: 6.5rem 0 3.5rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .4rem .8rem;
+      color: var(--purple-dark);
+      background: var(--purple-soft);
+      border: 1px solid rgba(124, 58, 237, .16);
+      border-radius: 999px;
+      font-size: .86rem;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      max-width: 760px;
+      margin: 1.1rem auto 0;
+      font-size: clamp(2.4rem, 6vw, 5.7rem);
+      line-height: .94;
+      letter-spacing: 0;
+      font-weight: 850;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 1.35rem auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.24rem);
+      line-height: 1.7;
+    }
+
+    .calculator-card,
+    .result-card,
+    .reading-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 22px 70px rgba(32, 20, 66, .08);
+    }
+
+    .calculator-card {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: clamp(1rem, 3vw, 2rem);
+    }
+
+    .form-control {
+      min-height: 56px;
+      border-color: #ded6ef;
+      border-radius: 8px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .form-control:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 .25rem rgba(124, 58, 237, .16);
+    }
+
+    .btn-purple {
+      min-height: 58px;
+      color: #fff;
+      background: var(--purple);
+      border: 0;
+      border-radius: 8px;
+      font-weight: 800;
+      box-shadow: 0 16px 34px rgba(124, 58, 237, .28);
+    }
+
+    .btn-purple:hover,
+    .btn-purple:focus {
+      color: #fff;
+      background: var(--purple-dark);
+    }
+
+    #google_vignette {
+      max-width: 850px;
+      min-height: 72px;
+      margin: 1rem auto 0;
+      display: grid;
+      place-items: center;
+      color: #7f7890;
+      background: repeating-linear-gradient(135deg, #faf8ff, #faf8ff 12px, #f4f0ff 12px, #f4f0ff 24px);
+      border: 1px dashed #cbbced;
+      border-radius: 8px;
+      font-size: .9rem;
+    }
+
+    .section-pad {
+      padding: 3.5rem 0;
+    }
+
+    .chart-shell {
+      padding: 1rem;
+      background: linear-gradient(180deg, #fff, #fbf9ff);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .matrix-svg {
+      width: 100%;
+      height: auto;
+      min-height: 360px;
+      display: block;
+    }
+
+    .chart-line { stroke: #bca9e8; stroke-width: 2.5; fill: none; }
+    .chart-line.strong { stroke: var(--purple); stroke-width: 3.5; }
+    .love-line { stroke: #ec4899; stroke-width: 3; stroke-dasharray: 8 8; }
+    .money-line { stroke: #10b981; stroke-width: 3; stroke-dasharray: 8 8; }
+    .node { fill: #fff; stroke: var(--purple); stroke-width: 3; filter: drop-shadow(0 8px 12px rgba(124, 58, 237, .12)); }
+    .node.outer { fill: var(--purple); }
+    .node.center { fill: #fff7ed; stroke: #f59e0b; stroke-width: 4; }
+    .node.money { stroke: #10b981; }
+    .node.love { stroke: #ec4899; }
+    .node-text { font-size: 18px; font-weight: 850; text-anchor: middle; dominant-baseline: middle; fill: var(--ink); }
+    .node-text.outer-text { fill: #fff; }
+    .node-label { font-size: 9px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; fill: #6f6684; text-transform: uppercase; }
+
+    .mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .32rem .62rem;
+      border-radius: 999px;
+      background: #f5f1ff;
+      color: var(--purple-dark);
+      font-size: .82rem;
+      font-weight: 800;
+    }
+
+    .reading-card {
+      height: 100%;
+      padding: 1.25rem;
+    }
+
+    .reading-card h3 {
+      margin: .75rem 0 .45rem;
+      font-size: 1.05rem;
+      font-weight: 850;
+    }
+
+    .reading-card p,
+    .small-muted {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .table>:not(caption)>*>* {
+      padding: .9rem .75rem;
+    }
+
+    .chakra-dot {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--purple);
+      font-weight: 800;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    footer {
+      color: #7f7890;
+      border-top: 1px solid var(--line);
+      padding: 2rem 0;
+    }
+
+    @media (max-width: 575.98px) {
+      .hero { padding-top: 5.25rem; }
+      .calculator-card { padding: 1rem; }
+      .matrix-svg { min-height: 300px; }
+      .table { font-size: .9rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
+        <span class="brand-mark">M</span>
+        <span>Matrix Destiny Calculator</span>
+      </a>
+      <a class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex" href="#calculator">Calculate</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero text-center">
+      <div class="container">
+        <span class="eyebrow">Free 22 Arcana Birth Chart</span>
+        <h1>Matrix Destiny Calculator</h1>
+        <p>The same patterns keep showing up in relationships, money, and direction. Your Destiny Matrix maps your birth date into a symbolic octagram using the 22 Major Arcana.</p>
+      </div>
+    </section>
+
+    <section id="calculator" class="pb-5">
+      <div class="container">
+        <form id="birthForm" class="calculator-card" novalidate>
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-3">
+              <label for="day" class="form-label fw-bold">Day</label>
+              <input id="day" class="form-control form-control-lg" type="number" min="1" max="31" placeholder="DD" required>
+            </div>
+            <div class="col-12 col-md-3">
+              <label for="month" class="form-label fw-bold">Month</label>
+              <input id="month" class="form-control form-control-lg" type="number" min="1" max="12" placeholder="MM" required>
+            </div>
+            <div class="col-12 col-md-3">
+              <label for="year" class="form-label fw-bold">Year</label>
+              <input id="year" class="form-control form-control-lg" type="number" min="1" max="9999" placeholder="YYYY" required>
+            </div>
+            <div class="col-12 col-md-3">
+              <button class="btn btn-purple w-100" type="submit">Calculate</button>
+            </div>
+          </div>
+          <div id="formError" class="alert alert-danger mt-3 mb-0 hidden" role="alert"></div>
+        </form>
+        <div id="google_vignette">Google Vignette Ad Placeholder</div>
+      </div>
+    </section>
+
+    <section id="results" class="section-pad hidden">
+      <div class="container">
+        <div class="row g-4 align-items-start">
+          <div class="col-lg-7">
+            <div class="result-card p-3 p-md-4">
+              <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                  <span class="mini-pill">Destiny Matrix</span>
+                  <h2 class="fw-black mt-2 mb-1">Your Full Octagram Chart</h2>
+                  <p id="dateSummary" class="small-muted mb-0"></p>
+                </div>
+                <button id="clearBtn" class="btn btn-sm btn-outline-secondary">Clear</button>
+              </div>
+              <div id="chart" class="chart-shell"></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="result-card p-3 p-md-4">
+              <span class="mini-pill">Core Reading</span>
+              <h2 id="centerTitle" class="mt-2 fw-bold"></h2>
+              <p id="centerMeaning" class="small-muted"></p>
+              <div id="coreList" class="row g-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="readingGrid" class="row g-3 mt-4"></div>
+
+        <div class="row g-4 mt-4">
+          <div class="col-lg-6">
+            <div class="result-card p-3 p-md-4 h-100">
+              <span class="mini-pill">Chakra Map</span>
+              <h2 class="fw-bold mt-2">Physical & Energy Body Chart</h2>
+              <div class="table-responsive mt-3">
+                <table class="table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Chakra</th>
+                      <th>Energy</th>
+                      <th>Physical</th>
+                      <th>Key</th>
+                    </tr>
+                  </thead>
+                  <tbody id="chakraBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="result-card p-3 p-md-4 h-100">
+              <span class="mini-pill">Yearly Energy</span>
+              <h2 class="fw-bold mt-2">Life Calendar</h2>
+              <p class="small-muted">A symbolic year-by-year energy map generated from your center and calendar year.</p>
+              <div id="yearlyEnergy" class="row g-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container text-center small">This frontend-only calculator is a reflective numerology tool, not medical, financial, or psychological advice.</div>
+  </footer>
+
+  <script>
+    const arcanaMeanings = {
+      1: { title: "The Magician", description: "Leader, willpower, and new beginnings. You carry the spark that starts movement. Use focus and integrity so power becomes creation, not pressure." },
+      2: { title: "The High Priestess", description: "Intuition, silence, and hidden knowing. You sense what is beneath the visible layer. Trust inner timing before forcing an answer." },
+      3: { title: "The Empress", description: "Abundance, beauty, and nurture. Life asks you to grow what is fertile. Care, creativity, and patience become your strongest medicine." },
+      4: { title: "The Emperor", description: "Order, authority, and structure. You are here to build what can last. Discipline works best when it protects the heart instead of armoring it." },
+      5: { title: "The Hierophant", description: "Teacher, tradition, and spiritual law. Your path opens through wisdom and mentoring. Question inherited rules until they become living truth." },
+      6: { title: "The Lovers", description: "Choice, devotion, and harmony. Relationships mirror your inner alignment. Love matures when desire, values, and responsibility stand together." },
+      7: { title: "The Chariot", description: "Drive, victory, and direction. You move through life by choosing a clear road. Balance ambition with emotional steadiness and the gate opens." },
+      8: { title: "Justice", description: "Karma, fairness, and right measure. Every action asks for balance. Your gift is seeing the pattern and restoring what has become uneven." },
+      9: { title: "The Hermit", description: "Wisdom, retreat, and inner light. Solitude refines your perception. Share what you discover so insight becomes guidance, not isolation." },
+      10: { title: "Wheel of Fortune", description: "Cycles, fate, and turning points. Change is a teacher on your path. Flow improves when you read the season before making the move." },
+      11: { title: "Strength", description: "Courage, vitality, and gentle power. Your force is most magnetic when calm. Master instinct and your presence becomes deeply healing." },
+      12: { title: "The Hanged Man", description: "Pause, surrender, and new vision. Delays reveal a hidden angle. Let go of the old posture and the meaning of the moment changes." },
+      13: { title: "Death", description: "Transformation, endings, and renewal. You are built for thresholds. Release what has completed its work so a truer life can breathe." },
+      14: { title: "Temperance", description: "Alchemy, balance, and moderation. Your power is integration. Blend opposites with patience and ordinary life becomes sacred practice." },
+      15: { title: "The Devil", description: "Desire, attachment, and material tests. Strong appetite lives here. Freedom comes when you name the chain and choose conscious pleasure." },
+      16: { title: "The Tower", description: "Breakthrough, truth, and liberation. False structures cannot hold your growth. What falls away clears space for an honest foundation." },
+      17: { title: "The Star", description: "Hope, inspiration, and guidance. You carry a restorative frequency. Keep faith practical by turning vision into a daily offering." },
+      18: { title: "The Moon", description: "Dreams, mystery, and the subconscious. Sensitivity is your portal. Work with fear gently and intuition becomes clearer than anxiety." },
+      19: { title: "The Sun", description: "Joy, success, and visibility. Your warmth awakens others. Shine without apology, and let generosity keep confidence clean." },
+      20: { title: "Judgement", description: "Calling, awakening, and ancestral voice. Your life asks for a higher response. Forgiveness releases the past and makes the next chapter audible." },
+      21: { title: "The World", description: "Completion, mastery, and wholeness. You are learning to inhabit the full circle. Integration turns experience into embodied wisdom." },
+      22: { title: "The Fool", description: "Freedom, trust, and divine adventure. Your soul learns through movement and openness. Begin again, but carry awareness with the leap." }
+    };
+
+    const positionMeta = {
+      A: ["Portrait Zone", "The visible self, first impression, and personality signature."],
+      B: ["Talents", "Natural gifts and the bridge between personal will and spiritual instinct."],
+      C: ["Character", "Inner style, emotional rhythm, and the way you meet the world."],
+      D: ["Love Line", "Relationship energy, attraction pattern, and heart lessons."],
+      E: ["Purpose Line", "Earth purpose, long-range development, and maturity path."],
+      F: ["Money Line", "Financial channel, practical growth, and prosperity behavior."],
+      G: ["Karmic Tail", "Inherited family pattern, old loop, and transformation point."],
+      H: ["Spirituality", "Sky purpose, intuition, and the higher lesson behind events."],
+      I: ["Comfort Zone", "Center energy, soul climate, and the place you return to under pressure."],
+      J: ["Revelation", "A hidden capacity born from portrait and center."],
+      K: ["Love Key", "How the heart line becomes conscious."],
+      L: ["Money Key", "How the wealth line becomes usable."],
+      M: ["Ancestral Key", "The correction point of family inheritance."],
+      N: ["Inner Child", "Soft instinct, early need, and emotional memory."],
+      O: ["Social Gate", "Public contribution and social exchange."],
+      P: ["Soul Task", "The repeating assignment that asks for mastery."],
+      Q: ["Heart Desire", "The quiet longing beneath choices."],
+      R: ["Prosperity Block", "Where material energy can stall until named."],
+      S: ["Karmic Lesson", "The old story that wants completion."]
+    };
+
+    const form = document.getElementById("birthForm");
+    const errorBox = document.getElementById("formError");
+    const results = document.getElementById("results");
+    const chart = document.getElementById("chart");
+    const readingGrid = document.getElementById("readingGrid");
+    const chakraBody = document.getElementById("chakraBody");
+    const yearlyEnergy = document.getElementById("yearlyEnergy");
+
+    function reduceTo22(num) {
+      let n = Math.abs(Number(num));
+      while (n > 22) {
+        n = String(n).split("").reduce((sum, digit) => sum + Number(digit), 0);
+      }
+      return n || 22;
+    }
+
+    function isValidDate(day, month, year) {
+      const test = new Date(year, month - 1, day);
+      return test.getFullYear() === year && test.getMonth() === month - 1 && test.getDate() === day;
+    }
+
+    function calculateMatrix(day, month, year) {
+      const A = reduceTo22(day);
+      const C = reduceTo22(month);
+      const E = reduceTo22(String(year).split("").reduce((a, b) => a + Number(b), 0));
+      const G = reduceTo22(A + C + E);
+      const I = reduceTo22(A + C + E + G);
+      const B = reduceTo22(A + C);
+      const D = reduceTo22(C + E);
+      const F = reduceTo22(E + G);
+      const H = reduceTo22(G + A);
+      const J = reduceTo22(A + I);
+      const K = reduceTo22(D + I);
+      const L = reduceTo22(F + I);
+      const M = reduceTo22(G + I);
+      const N = reduceTo22(B + I);
+      const O = reduceTo22(C + G);
+      const P = reduceTo22(A + E);
+      const Q = reduceTo22(D + H);
+      const R = reduceTo22(F + L);
+      const S = reduceTo22(G + M);
+
+      return {
+        A, B, C, D, E, F, G, H, I,
+        J, K, L, M, N, O, P, Q, R, S,
+        loveSum: reduceTo22(D + K + Q),
+        moneySum: reduceTo22(F + L + R),
+        karmicSum: reduceTo22(G + M + S),
+        purposeSum: reduceTo22(E + O + P),
+        year
+      };
+    }
+
+    function arcanaText(number) {
+      const meaning = arcanaMeanings[number];
+      return `${number} - ${meaning.title}: ${meaning.description}`;
+    }
+
+    function nodeSvg(x, y, value, label, extraClass = "", outer = false) {
+      const textClass = outer ? "node-text outer-text" : "node-text";
+      return `
+        <g>
+          <circle class="node ${outer ? "outer" : ""} ${extraClass}" cx="${x}" cy="${y}" r="${outer ? 25 : 22}"></circle>
+          <text class="${textClass}" x="${x}" y="${y - 2}">${value}</text>
+          <text class="node-label" x="${x}" y="${y + 34}">${label}</text>
+        </g>`;
+    }
+
+    function renderChart(m) {
+      const points = {
+        A: [70, 250], B: [122, 122], C: [250, 70], D: [378, 122],
+        E: [430, 250], F: [378, 378], G: [250, 430], H: [122, 378],
+        I: [250, 250], J: [150, 250], K: [318, 182], L: [318, 318],
+        M: [250, 342], N: [182, 182], O: [250, 150], P: [182, 318],
+        Q: [356, 250], R: [356, 356], S: [214, 390]
+      };
+      chart.innerHTML = `
+        <svg class="matrix-svg" viewBox="0 0 500 500" role="img" aria-label="Matrix Destiny octagram chart">
+          <rect x="70" y="70" width="360" height="360" rx="2" class="chart-line"></rect>
+          <path class="chart-line strong" d="M250 70 L430 250 L250 430 L70 250 Z"></path>
+          <path class="chart-line" d="M70 250 L430 250 M250 70 L250 430 M122 122 L378 378 M378 122 L122 378"></path>
+          <path class="love-line" d="M378 122 L250 250 L356 250"></path>
+          <path class="money-line" d="M378 378 L250 250 L356 356"></path>
+          ${nodeSvg(...points.A, m.A, "Day", "", true)}
+          ${nodeSvg(...points.B, m.B, "Talent", "", true)}
+          ${nodeSvg(...points.C, m.C, "Month", "", true)}
+          ${nodeSvg(...points.D, m.D, "Love", "love", true)}
+          ${nodeSvg(...points.E, m.E, "Year", "", true)}
+          ${nodeSvg(...points.F, m.F, "Money", "money", true)}
+          ${nodeSvg(...points.G, m.G, "Karma", "", true)}
+          ${nodeSvg(...points.H, m.H, "Spirit", "", true)}
+          ${nodeSvg(...points.I, m.I, "Center", "center")}
+          ${nodeSvg(...points.J, m.J, "Portrait")}
+          ${nodeSvg(...points.K, m.K, "Love Key", "love")}
+          ${nodeSvg(...points.L, m.L, "Money Key", "money")}
+          ${nodeSvg(...points.M, m.M, "Tail Key")}
+          ${nodeSvg(...points.N, m.N, "Gift")}
+          ${nodeSvg(...points.O, m.O, "Purpose")}
+          ${nodeSvg(...points.P, m.P, "Task")}
+          ${nodeSvg(...points.Q, m.Q, "Heart", "love")}
+          ${nodeSvg(...points.R, m.R, "Block", "money")}
+          ${nodeSvg(...points.S, m.S, "Lesson")}
+        </svg>`;
+    }
+
+    function renderCore(m) {
+      const center = arcanaMeanings[m.I];
+      document.getElementById("centerTitle").textContent = `${m.I} - ${center.title}`;
+      document.getElementById("centerMeaning").textContent = center.description;
+
+      const coreItems = ["A", "C", "E", "G", "B", "D", "F", "H"].map(key => {
+        const [label] = positionMeta[key];
+        return `<div class="col-6"><div class="p-2 border rounded-2 h-100"><strong>${label}</strong><br><span class="text-secondary">${arcanaText(m[key])}</span></div></div>`;
+      }).join("");
+      document.getElementById("coreList").innerHTML = coreItems;
+    }
+
+    function renderReadingCards(m) {
+      const sections = [
+        ["Portrait Zone", m.A, [m.A, m.J, m.N], "Your portrait begins with the day energy and is refined by the center. This zone shows how others first read your presence and where confidence becomes visible."],
+        ["Character", m.C, [m.C, m.O, m.P], "Character blends the month point with the purpose axis. It describes your natural rhythm, decision style, and the inner posture life keeps asking you to strengthen."],
+        ["Love Line", m.loveSum, [m.D, m.K, m.Q], "The love channel shows attraction, emotional needs, and repeated relationship lessons. Its combined number is the tone to practice consciously in bonds."],
+        ["Money Line", m.moneySum, [m.F, m.L, m.R], "The money channel points to how resources flow, where ambition gathers, and what can block prosperity until it is named and transformed."],
+        ["Karmic Tail", m.karmicSum, [m.G, m.M, m.S], "The karmic tail is the inherited loop: the family pattern, old instinct, or past lesson that asks for completion through awareness and disciplined choice."],
+        ["Purpose Line", m.purposeSum, [m.E, m.O, m.P], "The purpose line links material direction with social contribution. It shows where your life becomes meaningful when effort serves something larger than comfort."]
+      ];
+
+      readingGrid.innerHTML = sections.map(([title, number, parts, intro]) => {
+        const meaning = arcanaMeanings[number];
+        return `
+          <div class="col-md-6 col-xl-4">
+            <article class="reading-card">
+              <span class="mini-pill">${parts.join(" + ")} = ${number}</span>
+              <h3>${title}</h3>
+              <p>${intro}</p>
+              <p class="mb-0"><strong>${number} - ${meaning.title}</strong><br>${meaning.description}</p>
+            </article>
+          </div>`;
+      }).join("");
+    }
+
+    function renderChakras(m) {
+      const chakras = [
+        ["Sahasrara", m.H, m.C], ["Ajna", m.N, m.O], ["Vishuddha", m.B, m.P],
+        ["Anahata", m.Q, m.D], ["Manipura", m.I, m.J], ["Svadhisthana", m.L, m.F],
+        ["Muladhara", m.M, m.G]
+      ];
+
+      chakraBody.innerHTML = chakras.map(([name, energy, physical]) => {
+        const key = reduceTo22(energy + physical);
+        return `<tr>
+          <td><span class="chakra-dot me-2">${key}</span>${name}</td>
+          <td>${energy}</td>
+          <td>${physical}</td>
+          <td>${arcanaMeanings[key].title}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function renderYearlyEnergy(m) {
+      const now = new Date().getFullYear();
+      const cards = Array.from({ length: 8 }, (_, index) => {
+        const year = now + index;
+        const energy = reduceTo22(m.I + reduceTo22(year) + index + 1);
+        return `<div class="col-6 col-md-3">
+          <div class="p-3 border rounded-2 h-100 bg-white">
+            <div class="fw-bold">${year}</div>
+            <div class="display-6 fw-bold text-primary" style="color: var(--purple) !important;">${energy}</div>
+            <div class="small text-secondary">${arcanaMeanings[energy].title}</div>
+          </div>
+        </div>`;
+      }).join("");
+      yearlyEnergy.innerHTML = cards;
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      errorBox.classList.add("hidden");
+
+      const day = Number(document.getElementById("day").value);
+      const month = Number(document.getElementById("month").value);
+      const year = Number(document.getElementById("year").value);
+
+      if (!day || !month || !year) {
+        showError("Enter a complete date of birth.");
+        return;
+      }
+      if (year < 1 || year > 9999 || !isValidDate(day, month, year)) {
+        showError("Enter a valid calendar date.");
+        return;
+      }
+
+      const matrix = calculateMatrix(day, month, year);
+      document.getElementById("dateSummary").textContent = `Calculated for ${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}. All values use digit-sum reduction to the 1-22 Arcana range.`;
+      renderChart(matrix);
+      renderCore(matrix);
+      renderReadingCards(matrix);
+      renderChakras(matrix);
+      renderYearlyEnergy(matrix);
+      results.classList.remove("hidden");
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      form.reset();
+      results.classList.add("hidden");
+      document.getElementById("calculator").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  </script>
+</body>
+</html>
